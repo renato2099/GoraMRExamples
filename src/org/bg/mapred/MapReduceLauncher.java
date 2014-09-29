@@ -12,7 +12,6 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class MapReduceLauncher extends Configured implements Tool {
  
-  @Override
   public int run(String[] args) throws Exception {
     Job job = new Job(getConf());
     job.setJarByClass(getClass());
