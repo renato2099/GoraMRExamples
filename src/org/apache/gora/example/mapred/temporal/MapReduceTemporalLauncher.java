@@ -28,8 +28,8 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     checkOutPath(out, out.getFileSystem(job.getConfiguration()));
 
     job.setMapperClass(MapperTempAggr.class);
-    //job.setCombinerClass(ReducerExample.class);
-    //job.setReducerClass(ReducerExample.class);
+    job.setCombinerClass(ReducerTempAggr.class);
+    job.setReducerClass(ReducerTempAggr.class);
 
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(FloatWritable.class);
@@ -46,7 +46,6 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
       System.out.println("- - - Unable to delete output path - - - " + outputPath.toString());
       e.printStackTrace();
     }
-    
   }
 
   public static void main(String[] args) throws Exception {
