@@ -1,16 +1,17 @@
 package org.apache.gora.example.mapred.temporal;
 
+import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.KEY_COL;
+import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.TS_COL;
+import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.VAL_COL;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,9 @@ public class MapperTempAggr extends
   private int count = 0;
   private Map<String, Float> keys;
   private Map<String, Float> times;
+  private int keyCol;
+  private int tsCol;
+  private int valCol;
 
   @Override
   public void setup(Context context) throws IllegalArgumentException,
@@ -30,6 +34,9 @@ public class MapperTempAggr extends
     keys = new HashMap<String, Float>();
     times = new HashMap<String, Float>();
     sum = new Float(0.0);
+    keyCol = Integer.parseInt(context.getConfiguration().get(KEY_COL));
+    tsCol = Integer.parseInt(context.getConfiguration().get(TS_COL));
+    valCol = Integer.parseInt(context.getConfiguration().get(VAL_COL));
   }
 
   protected void map(LongWritable key, Text value, Context context)
@@ -37,15 +44,14 @@ public class MapperTempAggr extends
     if (count != 0) {
       String[] split = value.toString().trim().split("\\s+");
       try {
-        if (split.length > 3) {
-          // [CO2 Year&Month Year Month]
-          if (!keys.containsKey(split[1])) {
-            sum += Float.parseFloat(split[0]);
+        if (verifyLine(split)) {
+          if (!keys.containsKey(split[keyCol])) {
+            sum += Float.parseFloat(split[valCol]);
           } else {
-            sum += Float.parseFloat(split[0]) - keys.get(split[0]);
-            keys.put(split[0], Float.parseFloat(split[1]));
+            sum += Float.parseFloat(split[valCol]) - keys.get(split[keyCol]);
           }
-          times.put(split[1], sum);
+          keys.put(split[keyCol], Float.parseFloat(split[valCol]));
+          times.put(split[tsCol], sum);
         }
       } catch (Exception e) {
         for (String p : split)
@@ -54,6 +60,12 @@ public class MapperTempAggr extends
       }
     }
     count++;
+  }
+
+  private boolean verifyLine(String[] split) {
+    if (split.length > keyCol & split.length > tsCol & split.length > valCol)
+      return true;
+    return false;
   }
 
   @Override

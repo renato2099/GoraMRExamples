@@ -16,10 +16,17 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class MapReduceTemporalLauncher extends Configured implements Tool {
 
+  public static final String TS_COL = "ts";
+  public static final String KEY_COL = "key";
+  public static final String VAL_COL = "val";
+
   public int run(String[] args) throws Exception {
     Job job = Job.getInstance(new Configuration());
     job.setJarByClass(getClass());
     job.setJobName(getClass().getSimpleName());
+    job.getConfiguration().set(KEY_COL, args[2]);
+    job.getConfiguration().set(TS_COL, args[3]);
+    job.getConfiguration().set(VAL_COL, args[4]);
 
     Path in = new Path(args[0]);
     Path out = new Path(args[1]);
@@ -49,8 +56,8 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 2) {
-      System.out.println("usage: [input] [output]");
+    if (args.length != 5) {
+      System.out.println("usage: [input] [output] [keyCol] [tsCol] [valCol]");
       System.exit(-1);
     }
     int rc = ToolRunner.run(new MapReduceTemporalLauncher(), args);
