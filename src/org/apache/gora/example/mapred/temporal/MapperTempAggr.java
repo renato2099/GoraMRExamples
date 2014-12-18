@@ -15,6 +15,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+
 public class MapperTempAggr extends
     Mapper<LongWritable, Text, Text, FloatWritable> {
 
@@ -41,8 +44,8 @@ public class MapperTempAggr extends
 
   protected void map(LongWritable key, Text value, Context context)
       throws IOException, InterruptedException {
-    if (count != 0) {
-      String[] split = value.toString().trim().split("\\s+");
+    if (count > 2) {
+       String[] split = Iterables.toArray(Splitter.on("\t").trimResults().omitEmptyStrings().split(value.toString()), String.class);
       try {
         if (verifyLine(split)) {
           if (!keys.containsKey(split[keyCol])) {
