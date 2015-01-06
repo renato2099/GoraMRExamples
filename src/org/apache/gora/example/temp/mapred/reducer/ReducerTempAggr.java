@@ -1,4 +1,4 @@
-package org.apache.gora.example.mapred.temporal;
+package org.apache.gora.example.temp.mapred.reducer;
 
 import java.io.IOException;
 

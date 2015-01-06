@@ -1,13 +1,15 @@
-package org.apache.gora.example.mapred.temporal;
+package org.apache.gora.example.temp.mapred.mapper;
 
-import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.KEY_COL;
-import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.TS_COL;
-import static org.apache.gora.example.mapred.temporal.MapReduceTemporalLauncher.VAL_COL;
+import static org.apache.gora.example.temp.mapred.MapReduceTemporalLauncher.KEY_COL;
+import static org.apache.gora.example.temp.mapred.MapReduceTemporalLauncher.TS_COL;
+import static org.apache.gora.example.temp.mapred.MapReduceTemporalLauncher.VAL_COL;
+import static org.apache.gora.example.temp.mapred.MapReduceTemporalLauncher.SKIP_LINES;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.gora.example.temp.mapred.MapReduceTemporalLauncher;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -21,7 +23,7 @@ import com.google.common.collect.Iterables;
 public class MapperTempAggr extends
     Mapper<LongWritable, Text, Text, FloatWritable> {
 
-  private static Logger Logger = LoggerFactory.getLogger(MapperTempAggr.class);
+private static Logger Logger = LoggerFactory.getLogger(MapperTempAggr.class);
   private Float sum;
   private int count = 0;
   private Map<String, Float> keys;
@@ -44,10 +46,10 @@ public class MapperTempAggr extends
 
   protected void map(LongWritable key, Text value, Context context)
       throws IOException, InterruptedException {
-    if (count > 2) {
+    if (count > SKIP_LINES) {
        String[] split = Iterables.toArray(Splitter.on("\t").trimResults().omitEmptyStrings().split(value.toString()), String.class);
       try {
-        if (verifyLine(split)) {
+        if (MapReduceTemporalLauncher.verifyLine(split, keyCol, tsCol, valCol)) {
           if (!keys.containsKey(split[keyCol])) {
             sum += Float.parseFloat(split[valCol]);
           } else {
@@ -63,12 +65,6 @@ public class MapperTempAggr extends
       }
     }
     count++;
-  }
-
-  private boolean verifyLine(String[] split) {
-    if (split.length > keyCol & split.length > tsCol & split.length > valCol)
-      return true;
-    return false;
   }
 
   @Override
