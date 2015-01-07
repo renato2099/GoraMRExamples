@@ -54,17 +54,20 @@ public class MapperTimeSlice extends Mapper<LongWritable, Text, Text, Text> {
                         valCol)) {
                     // In this case as the schema is fixed then new tuples can
                     // simply replace old ones
-                    if (!keys.containsKey(split[keyCol])) {
-                        keys.put(split[keyCol], split[tsVal] + '#' + value.toString());
-                    } else {
-                        String prevTs = Splitter.on("#").omitEmptyStrings()
-                                .split(keys.get(split[keyCol])).iterator()
-                                .next();
-                        if (Float.parseFloat(prevTs) < Float .parseFloat(split[tsCol])) {
-                            // pre-aggr per partition
+                    if (tsVal == Float.parseFloat(split[tsCol])) {
+                        System.out.println(tsVal + " -- " + split[tsCol]);
+                        if (!keys.containsKey(split[keyCol])) {
                             keys.put(split[keyCol], split[tsVal] + '#' + value.toString());
                         } else {
-                            Logger.error("Something went wrong.");
+                            String prevTs = Splitter.on("#").omitEmptyStrings()
+                                    .split(keys.get(split[keyCol])).iterator()
+                                    .next();
+                            if (Float.parseFloat(prevTs) < Float.parseFloat(split[tsCol])) {
+                                // pre-aggr per partition
+                                keys.put(split[keyCol], split[tsVal] + '#' + value.toString());
+                            } else {
+                                Logger.error("Something went wrong.");
+                            }
                         }
                     }
                 }

@@ -27,14 +27,15 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     private static final String USAGE = "usage: [op] [input] [output] [keyCol] [tsCol] [valCol] [tsVal]";
 
     public enum TempOp {
-        slice("slice"),
-        aggr("aggr");
+        slice("slice"), aggr("aggr");
         private final String name;
+
         private TempOp(String s) {
             name = s;
         }
+
         public boolean equalsName(String oth) {
-            return (oth == null)?false:name.equals(oth);
+            return (oth == null) ? false : name.equals(oth);
         }
     }
 
@@ -58,7 +59,7 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     }
 
     private void configure(Job job, String args[]) {
-        //job column configuration
+        // job column configuration
         job.getConfiguration().set(KEY_COL, args[3]);
         job.getConfiguration().set(TS_COL, args[4]);
         job.getConfiguration().set(VAL_COL, args[5]);
@@ -114,7 +115,8 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
 
     public static boolean verifyLine(String[] split, int kCol, int tCol,
             int vCol) {
-        if (split.length > kCol & split.length > tCol & split.length > vCol)
+        if (split.length == 10 & split.length > kCol & split.length > tCol
+                & split.length > vCol)
             return true;
         return false;
     }
