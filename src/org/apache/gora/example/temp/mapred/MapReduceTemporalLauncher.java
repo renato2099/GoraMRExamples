@@ -95,7 +95,7 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
-        if (6 < args.length && args.length <= 7) {
+        if (6 >= args.length && args.length > 8) {
             System.out.println(USAGE);
             System.exit(-1);
         }

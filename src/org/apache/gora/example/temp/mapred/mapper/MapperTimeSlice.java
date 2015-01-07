@@ -55,7 +55,6 @@ public class MapperTimeSlice extends Mapper<LongWritable, Text, Text, Text> {
                     // In this case as the schema is fixed then new tuples can
                     // simply replace old ones
                     if (!keys.containsKey(split[keyCol])) {
-                        System.out.println("ss");
                         keys.put(split[keyCol], split[tsVal] + '#' + value.toString());
                     } else {
                         String prevTs = Splitter.on("#").omitEmptyStrings()
