@@ -24,20 +24,29 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     public static final String VAL_COL = "val";
     public static final int SKIP_LINES = 2;
     public static final String TS_VAL = "ts_val";
-
     private static final String USAGE = "usage: [op] [input] [output] [keyCol] [tsCol] [valCol] [tsVal]";
+
+    public enum TempOp {
+        slice("slice"),
+        aggr("aggr");
+        private final String name;
+        private TempOp(String s) {
+            name = s;
+        }
+        public boolean equalsName(String oth) {
+            return (oth == null)?false:name.equals(oth);
+        }
+    }
 
     public int run(String[] args) throws Exception {
         Job job = Job.getInstance(new Configuration());
         job.setJarByClass(getClass());
         job.setJobName(getClass().getSimpleName());
-        // /1 Data/customer.tbl /out2 3 8 0
         Path in = new Path(args[1]);
         Path out = new Path(args[2]);
         FileInputFormat.addInputPath(job, in);
         FileOutputFormat.setOutputPath(job, out);
         checkOutPath(out, out.getFileSystem(job.getConfiguration()));
-
         configure(job, args);
 
         long stime = System.currentTimeMillis();
@@ -49,14 +58,14 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     }
 
     private void configure(Job job, String args[]) {
-
         //job column configuration
         job.getConfiguration().set(KEY_COL, args[3]);
         job.getConfiguration().set(TS_COL, args[4]);
         job.getConfiguration().set(VAL_COL, args[5]);
+        TempOp op = TempOp.valueOf(TempOp.class, args[0]);
 
-        switch (args[0].charAt(0)) {
-            case '0':
+        switch (op) {
+            case slice:
                 job.setMapperClass(MapperTimeSlice.class);
                 // job.setCombinerClass(ReducerTempAggr.class);
                 // job.setReducerClass(ReducerTempAggr.class);
@@ -69,7 +78,7 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
                 }
                 job.getConfiguration().set(TS_VAL, args[6]);
                 break;
-            case '1':
+            case aggr:
                 job.setMapperClass(MapperTempAggr.class);
                 job.setCombinerClass(ReducerTempAggr.class);
                 job.setReducerClass(ReducerTempAggr.class);
