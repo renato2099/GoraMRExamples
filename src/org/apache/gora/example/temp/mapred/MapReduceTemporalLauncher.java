@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.gora.example.temp.mapred.mapper.MapperTempAggr;
 import org.apache.gora.example.temp.mapred.mapper.MapperTimeSlice;
 import org.apache.gora.example.temp.mapred.reducer.ReducerTempAggr;
+import org.apache.gora.example.temp.mapred.reducer.ReducerTimeSlice;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,6 +26,7 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
     public static final int SKIP_LINES = 2;
     public static final String TS_VAL = "ts_val";
     private static final String USAGE = "usage: [op] [input] [output] [keyCol] [tsCol] [valCol] [tsVal]";
+    public static final String TS_DELIM = "@";
 
     public enum TempOp {
         slice("slice"), aggr("aggr");
@@ -69,7 +71,7 @@ public class MapReduceTemporalLauncher extends Configured implements Tool {
             case slice:
                 job.setMapperClass(MapperTimeSlice.class);
                 // job.setCombinerClass(ReducerTempAggr.class);
-                // job.setReducerClass(ReducerTempAggr.class);
+                job.setReducerClass(ReducerTimeSlice.class);
 
                 job.setOutputKeyClass(Text.class);
                 job.setOutputValueClass(Text.class);
