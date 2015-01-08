@@ -55,7 +55,7 @@ public class MapperTimeSlice extends Mapper<LongWritable, Text, Text, Text> {
                         valCol)) {
                     // In this case as the schema is fixed then new tuples can
                     // simply replace old ones. No need to aggregate past ones
-                    if (tsVal == Float.parseFloat(split[tsCol])) {
+                    if (tsVal >= Float.parseFloat(split[tsCol])) {
                         if (!keys.containsKey(split[keyCol])) {
                             keys.put(split[keyCol], split[tsCol] + TS_DELIM
                                     + value.toString());
